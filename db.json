@@ -1,0 +1,52 @@
+{
+  "user": [
+    {
+      "name": "shiva",
+      "email": "shiva@gmail.com",
+      "password": "shiva@123",
+      "gender": "Male",
+      "termsandcondition": true,
+      "age": "greaterThan20",
+      "facebook": "fb",
+      "instagram": "ig",
+      "hobbie1": "trek",
+      "hobbie2": "code",
+      "id": 4
+    },
+    {
+      "name": "pranil",
+      "email": "pranil@gmail.com",
+      "password": "pranil@113",
+      "gender": "Male",
+      "termsandcondition": true,
+      "age": "greaterThan20",
+      "facebook": "fb",
+      "instagram": "ig",
+      "hobbie1": "trek",
+      "hobbie2": "code",
+      "id": 5
+    },
+    {
+      "name": "cto",
+      "email": "shiva@gmail.com",
+      "password": "",
+      "gender": "",
+      "termsandcondition": false,
+      "age": "lessThan20",
+      "facebook": "sadsad",
+      "instagram": "",
+      "id": 6
+    },
+    {
+      "name": "cto",
+      "email": "shiva@gmail.com",
+      "password": "",
+      "gender": "",
+      "termsandcondition": false,
+      "age": "lessThan20",
+      "facebook": "sadsad",
+      "instagram": "",
+      "id": 7
+    }
+  ]
+}
