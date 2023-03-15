@@ -1,20 +1,43 @@
-import React from "react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import "./Reactform.css";
 import axios from "axios";
-import UserTable from "./UserTable";
+import { styled } from "@mui/material/styles";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell, { tableCellClasses } from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Paper from "@mui/material/Paper";
+
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+  [`&.${tableCellClasses.head}`]: {
+    backgroundColor: "#40513B",
+    color: theme.palette.common.white,
+  },
+  [`&.${tableCellClasses.body}`]: {
+    fontSize: 14,
+  },
+}));
+
+const StyledTableRow = styled(TableRow)(() => ({
+  backgroundColor: "#609966",
+}));
 
 const Reactform = () => {
-  const [data, setData] = useState({});
   const [userData, setUserData] = useState([{}]);
+  const [editValues, setEditValues] = useState(null);
 
-  useEffect(() => {
-    getData();
-  }, []);
+  const getData = () => {
+    axios
+      .get("http://localhost:8080/user")
+      .then((res) => setUserData(res.data))
+      .catch((err) => console.log("error", err));
+  };
 
-  const defaultValues = {
+  const initialValues = {
     name: "",
     email: "",
     password: "",
@@ -29,57 +52,51 @@ const Reactform = () => {
 
   const handleSubmit = (values, { resetForm }) => {
     console.log("valuesssssssssss", values);
-    setData({
-      name: values.name,
-      email: values.email,
-      password: values.password,
-      gender: values.gender,
-      termsandcondition: values.termsandcondition,
-      age: values.age,
-      facebook: values.social.facebook,
-      instagram: values.social.instagram ?? "N/A",
-    });
-    resetForm({ values: "" });
-    getData()
-  };
 
-  console.log("datat from state", data);
+    editValues
+      ? axios
+          .put(`http://localhost:8080/user/${editValues.id}`, values)
+          .then(() => {
+            getData();
+            resetForm({ values: "" });
+          })
+      : axios.post("http://localhost:8080/user/", values).then(() => {
+          console.log("post");
+          getData();
+          resetForm({ values: "" });
+        });
+
+    editValues && setEditValues(null);
+  };
 
   const validationSchema = Yup.object().shape({
-    // name: Yup.string()
-    //   .min(3, "Min 3 chars")
-    //   .max(10, "max 10 chars")
-    //   .required("Required !"),
-    // email: Yup.string()
-    //   .matches(
-    //     /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-    //     "invalid email"
-    //   )
-    //   .required("Required !"),
-    // password: Yup.string()
-    //   .required("Required !")
-    //   .matches(
-    //     /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{5,}$/,
-    //     "Set a Strong Password"
-    //   ),
-    // gender: Yup.string().required("required !"),
-    // termsandcondition: Yup.boolean().oneOf(
-    //   [true],
-    //   "Please accept the terms and condition"
-    // ),
-    // age: Yup.string().required("required !"),
-    // social: Yup.object().shape({
-    //   facebook: Yup.string().required("Facebook username is required"),
-    //   // instagram: Yup.string().required('LinkedIn username is required')
-    // }),
+    name: Yup.string()
+      .min(3, "Min 3 chars")
+      .max(10, "max 10 chars")
+      .required("Required !"),
+    email: Yup.string()
+      .matches(
+        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+        "invalid email"
+      )
+      .required("Required !"),
+    password: Yup.string()
+      .required("Required !")
+      .matches(
+        /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{5,}$/,
+        "Set a Strong Password"
+      ),
+    gender: Yup.string().required("required !"),
+    termsandcondition: Yup.boolean().oneOf(
+      [true],
+      "Please accept the terms and condition"
+    ),
+    age: Yup.string().required("required !"),
+    social: Yup.object().shape({
+      facebook: Yup.string().required("Facebook username is required"),
+      // instagram: Yup.string().required('LinkedIn username is required')
+    }),
   });
-
-  const getData = () => {
-    axios
-      .get("http://localhost:8080/user")
-      .then((res) => setUserData(res.data))
-      .catch((err) => console.log("error", err));
-  };
 
   const handleDelete = (id) => {
     axios
@@ -88,28 +105,19 @@ const Reactform = () => {
       .catch((err) => console.log("delete err", err));
   };
 
-  const addUser = async (values) => {
-    await axios
-      .post("http://localhost:8080/user", data)
-      .then(() => {
-        // getData()
-        alert("user Added");
-      })
-      .catch((err) => console.log("post err", err));
-  };
-
-  if (Object.values(data) != 0) {
-    addUser();
-  }
+  useEffect(() => {
+    getData();
+  }, []);
 
   return (
     <>
       <div className="main">
         <h1>Form using Formik and Yup</h1>{" "}
         <Formik
-          initialValues={defaultValues}
+          initialValues={editValues || initialValues}
           onSubmit={handleSubmit}
           validationSchema={validationSchema}
+          enableReinitialize
         >
           <Form className="form-div">
             <div className="row">
@@ -224,22 +232,68 @@ const Reactform = () => {
 
             <div className="input-div condition">
               <label className="terms">
-                <Field className="radio-terms" type="checkbox" name="termsandcondition"></Field>
+                <Field
+                  className="radio-terms"
+                  type="checkbox"
+                  name="termsandcondition"
+                ></Field>
                 <span className="terms-msg">I Accept Terms and Conditions</span>
               </label>
-              <span >
+              <span>
                 <ErrorMessage name="termsandcondition" />
               </span>
             </div>
 
             <button className="submit-btn" type="submit">
-              Submit
+              {editValues ? "Update" : "Submit"}
             </button>
           </Form>
         </Formik>
       </div>
 
-      <UserTable userData={userData} handleDelete={handleDelete} />
+      <div className="table">
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <StyledTableCell align="centre">Name</StyledTableCell>
+                <StyledTableCell align="centre">Email</StyledTableCell>
+                <StyledTableCell align="centre">Password</StyledTableCell>
+                <StyledTableCell align="centre">Gender</StyledTableCell>
+                <StyledTableCell align="centre">Age</StyledTableCell>
+                <StyledTableCell align="centre">Actions</StyledTableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {userData.map((row) => (
+                <StyledTableRow key={row.name}>
+                  <StyledTableCell align="centre">{row?.name}</StyledTableCell>
+                  <StyledTableCell align="centre">{row?.email}</StyledTableCell>
+                  <StyledTableCell align="centre">
+                    {row?.password}
+                  </StyledTableCell>
+                  <StyledTableCell align="centre">
+                    {row?.gender}
+                  </StyledTableCell>
+                  <StyledTableCell align="centre">{row?.age}</StyledTableCell>
+                  <StyledTableCell align="centre">
+                    <button onClick={() => handleDelete(row.id)}>
+                      Delete{" "}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setEditValues(row);
+                      }}
+                    >
+                      Edit
+                    </button>
+                  </StyledTableCell>
+                </StyledTableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </div>
     </>
   );
 };
